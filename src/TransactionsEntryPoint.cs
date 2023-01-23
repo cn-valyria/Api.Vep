@@ -31,6 +31,7 @@ public class TransactionsEntryPoint
         ILogger log)
     {
         log.LogInformation($"Beginning execution for {nameof(SearchTransactions)} method...");
+        log.LogInformation("Received query params: {@query}", request.Query);
 
         try
         {
@@ -38,6 +39,8 @@ public class TransactionsEntryPoint
             var filters = ConvertToFilters(request.Query);
             var limit = ConvertFromQueryString<int>(request.Query["limit"]);
             var offset = ConvertFromQueryString<int>(request.Query["offset"]);
+
+            log.LogInformation("Parsed the filters {filters} with limit {limit} and offset {offset}", JsonSerializer.Serialize(filters), limit, offset);
 
             var searchResults = await _transactionsRepository.SearchTransactionsAsync(transactionType, filters, limit ?? 100, offset ?? 0);
 
