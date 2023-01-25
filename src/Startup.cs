@@ -2,6 +2,7 @@ using api.Auth;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Repository;
 
 [assembly: FunctionsStartup(typeof(api.Startup))]
@@ -30,7 +31,8 @@ internal static class StartupExtensions
             .AddTransient<IAuthorizationRepository>(sp => new AuthorizationRepository(vepDbConnectionString))
             .AddTransient<IAccountsRepository>(sp => new AccountsRepository(vepDbConnectionString))
             .AddTransient<ITransactionsRepository>(sp => new TransactionsRepository(vepDbConnectionString))
-            .AddTransient<IListsRepository>(sp => new ListsRepository(vepDbConnectionString));
+            .AddTransient<IListsRepository>(sp => new ListsRepository(vepDbConnectionString))
+            .AddTransient<IAdminRepository>(sp => new AdminRepository(vepDbConnectionString));
     }
 
     public static IServiceCollection AddInternalProviders(this IServiceCollection services) => services
