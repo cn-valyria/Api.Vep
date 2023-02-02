@@ -30,8 +30,8 @@ select 	account.id as Id,
     account.fm as HasForeignMinistry,
     account.fac as HasFederalAidCommission,
     account.dra as HasDisasterReliefAgency,
-    coalesce(sent_aid_active.count, 0) + coalesce(recd_aid_active.count, 0) as SlotsUsed,
-    4 + account.fm + account.fac as SlotsFull,
+    aid_activity.slots_used as SlotsUsed,
+    aid_activity.slots_full as SlotsFull,
     coalesce(sent_aid.money, 0) div 1000000 as TotalCashSent,
     coalesce(recd_aid.money, 0) div 1000000 as TotalCashReceived,
     coalesce(sent_aid.technology, 0) as TotalTechSent,
@@ -49,30 +49,20 @@ select 	account.id as Id,
     999 as PreviousListOrder
 from vep_db.account account
 join vep_db.balance balance on account.nation_id = balance.nation_id
+join vep_db.aid_activity on account.id = aid_activity.account_id
 join cybernations_db.nation nation on account.nation_id = nation.id
 join cybernations_db.alliance alliance on nation.alliance_id = alliance.id
 left join (
-select sending_nation_id as nation_id, count(1) as `count`
-from cybernations_db.aid
-where date(`date`) > curdate() - interval 10 day
-group by sending_nation_id
-) sent_aid_active on nation.id = sent_aid_active.nation_id
-left join (
-select receiving_nation_id as nation_id, count(1) as `count`
-from cybernations_db.aid
-where date(`date`) > curdate() - interval 10 day
-group by receiving_nation_id
-) recd_aid_active on nation.id = recd_aid_active.nation_id
-left join (
-select sending_nation_id as nation_id, sum(money) as money, sum(technology) as technology
-from cybernations_db.aid
-group by sending_nation_id
+	select sending_nation_id as nation_id, sum(money) as money, sum(technology) as technology
+	from cybernations_db.aid
+	group by sending_nation_id
 ) sent_aid on nation.id = sent_aid.nation_id
 left join (
-select receiving_nation_id as nation_id, sum(money) as money, sum(technology) as technology
-from cybernations_db.aid
-group by receiving_nation_id
-) recd_aid on nation.id = recd_aid.nation_id";
+	select receiving_nation_id as nation_id, sum(money) as money, sum(technology) as technology
+	from cybernations_db.aid
+	group by receiving_nation_id
+) recd_aid on nation.id = recd_aid.nation_id
+where nation.id = 131473;";
 
     public AccountsRepository(string connectionString) => _connectionString = connectionString;
 
