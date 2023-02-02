@@ -61,8 +61,7 @@ left join (
 	select receiving_nation_id as nation_id, sum(money) as money, sum(technology) as technology
 	from cybernations_db.aid
 	group by receiving_nation_id
-) recd_aid on nation.id = recd_aid.nation_id
-where nation.id = 131473;";
+) recd_aid on nation.id = recd_aid.nation_id";
 
     public AccountsRepository(string connectionString) => _connectionString = connectionString;
 
