@@ -60,7 +60,7 @@ public class TransactionsRepository : ITransactionsRepository
             _sent_until = (DateTime?) null
         }, commandType: CommandType.StoredProcedure);
 
-        return (await sqlConnection.QueryAsync<TransactionDetail>("select * from tmpTxnSearchResults")).ToList();
+        return (await sqlConnection.QueryAsync<TransactionDetail>("select * from tmpTxnSearchResults order by AidId desc, StartsOn desc")).ToList();
     }
 
     public async Task<int> CreateTransactionAsync(TransactionCreateRequest transaction)
