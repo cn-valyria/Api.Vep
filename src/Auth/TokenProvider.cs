@@ -22,7 +22,11 @@ public class TokenProvider : ITokenProvider
         _logger = logger;
     }
 
-    public string GenerateToken(AuthorizeUserRequest account)
+    public string GenerateAccessToken(AuthorizeUserRequest account) => GenerateToken(account, 1);
+
+    public string GenerateRefreshToken(AuthorizeUserRequest account) => GenerateToken(account, 30);
+
+    private string GenerateToken(AuthorizeUserRequest account, int daysExpiresIn)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_jwtSecret);
@@ -34,7 +38,7 @@ public class TokenProvider : ITokenProvider
                 new Claim(TokenClaims.RulerName, account.RulerName ?? string.Empty),
                 new Claim(TokenClaims.UniqueCode, account.UniqueCode)
             }),
-            Expires = DateTime.UtcNow.AddDays(7),
+            Expires = DateTime.UtcNow.AddDays(daysExpiresIn),
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
 
@@ -97,7 +101,8 @@ public class TokenProvider : ITokenProvider
 
 public interface ITokenProvider
 {
-    string GenerateToken(AuthorizeUserRequest account);
+    string GenerateAccessToken(AuthorizeUserRequest account);
+    string GenerateRefreshToken(AuthorizeUserRequest account);
     AuthorizeUserRequest ReadToken(string token);
     bool ValidateToken(string token);
 }

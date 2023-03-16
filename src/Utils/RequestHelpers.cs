@@ -7,7 +7,7 @@ public static class RequestHelpers
 {
     public static string GetJwtBearerToken(this HttpRequest request)
     {
-        var authHeader = request.Headers["X-Valyria-Auth"].FirstOrDefault();
+        var authHeader = request.Headers["Authorization"].FirstOrDefault();
         if (string.IsNullOrEmpty(authHeader))
             return null;
         

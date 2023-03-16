@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -48,12 +50,40 @@ public class UserEntryPoint
 
             logger.LogInformation($"Account (NationId: {account.NationId}, RulerName: {account.RulerName}, UniqueCode: {account.UniqueCode}) was authenticated");
 
-            var newJwtToken = _tokenProvider.GenerateToken(account);
-            return new OkObjectResult(newJwtToken);
+            return new OkObjectResult(GenerateTokenResponse(account));
         }
         catch (Exception e)
         {
             var wrapperException = new Exception($"Unexpected error occurred while executing {nameof(Authenticate)}", e);
+            logger.LogError(e, wrapperException.Message);
+            return new ExceptionResult(wrapperException, true);
+        }
+    }
+
+    [FunctionName(nameof(RefreshToken))]
+    public async Task<IActionResult> RefreshToken(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "user/refresh")] HttpRequest request,
+        ILogger logger)
+    {
+        logger.LogInformation($"Beginning execution for {nameof(RefreshToken)} method...");
+
+        try
+        {
+            var body = await JsonSerializer.DeserializeAsync<Dictionary<string, string>>(request.Body);
+            if (!body.TryGetValue("refresh_token", out var refreshToken))
+                return new UnauthorizedResult();
+
+            var account = _tokenProvider.ReadToken(refreshToken);
+            if (account is null)
+                return new UnauthorizedResult();
+
+            logger.LogInformation($"Account (NationId: {account.NationId}, RulerName: {account.RulerName}, UniqueCode: {account.UniqueCode}) was authenticated");
+
+            return new OkObjectResult(GenerateTokenResponse(account));
+        }
+        catch (Exception e)
+        {
+            var wrapperException = new Exception($"Unexpected error occurred while executing {nameof(RefreshToken)}", e);
             logger.LogError(e, wrapperException.Message);
             return new ExceptionResult(wrapperException, true);
         }
@@ -84,5 +114,16 @@ public class UserEntryPoint
             logger.LogError(e, wrapperException.Message);
             return new ExceptionResult(wrapperException, true);
         }
+    }
+
+    private object GenerateTokenResponse(AuthorizeUserRequest account)
+    {
+        var accessToken = _tokenProvider.GenerateAccessToken(account);
+        var newRefreshToken = _tokenProvider.GenerateRefreshToken(account);
+        return new
+        {
+            access_token = accessToken,
+            refresh_token = newRefreshToken
+        };
     }
 }
