@@ -28,7 +28,8 @@ join balance b on a.nation_id = b.nation_id
 join aid_activity aa on a.id = aa.account_id
 join cybernations_db.nation nation on a.nation_id = nation.id
 join cybernations_db.alliance alliance on nation.alliance_id = alliance.id
-join list_recipient lr on a.id = lr.account_id;";
+join list_recipient lr on a.id = lr.account_id
+order by lr.list_id, lr.priority;";
 
     public ListsRepository(string connectionString) => _connectionString = connectionString;
 
