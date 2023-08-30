@@ -21,7 +21,7 @@ public class AdminRepository : IAdminRepository
         using var sqlConnection = new MySqlConnection(_connectionString);
         const string query = @"
 select
-	(select count(1) from account) as TotalAccounts,
+	(select count(1) from account where va <> 'H') as TotalAccounts,
     (select count(1) from account where va = 'B') as TotalBuyers,
     (select count(1) from account where va = 'S' or va = 'N') as TotalSellers,
     (select count(1) from transaction) as TotalTransactions,
@@ -91,7 +91,7 @@ group by date(`date`);";
     private async Task<List<AccountCountByRole>> GetAccountsPerRoleAsync()
     {
         using var sqlConnection = new MySqlConnection(_connectionString);
-        const string query = @"select va as Role, count(1) as TotalAccounts from account group by va;";
+        const string query = @"select va as Role, count(1) as TotalAccounts from account where va <> 'H' group by va;";
 
         return (await sqlConnection.QueryAsync<AccountCountByRole>(query)).ToList();
     }
@@ -103,6 +103,7 @@ group by date(`date`);";
 select va as Role, sum(slots_full) as TotalSlots
 from account
 join aid_activity on account.id = aid_activity.account_id
+where va <> 'H'
 group by va;";
 
         return (await sqlConnection.QueryAsync<TotalSlotCountByRole>(query)).ToList();
