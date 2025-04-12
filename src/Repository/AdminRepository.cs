@@ -94,7 +94,12 @@ group by date(`date`);";
     private async Task<List<AccountCountByRole>> GetAccountsPerRoleAsync()
     {
         using var sqlConnection = new MySqlConnection(_connectionString);
-        const string query = @"select va as Role, count(1) as TotalAccounts from account where va <> 'H' group by va;";
+        const string query = @"
+select va as Role, count(1) as TotalAccounts
+from account
+join cybernations_db.nation on account.nation_id = nation.id
+where va <> 'H'
+group by va;";
 
         return (await sqlConnection.QueryAsync<AccountCountByRole>(query)).ToList();
     }
