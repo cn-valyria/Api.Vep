@@ -55,7 +55,10 @@ select
 select date(`date`) as DayTxnRecorded, count(1) as TxnCount
 from transaction
 join cybernations_db.aid on transaction.aid_id = aid.id
+join account sending_account on aid.sending_nation_id = sending_account.nation_id
+join account receiving_account on aid.receiving_nation_id = receiving_account.nation_id
 where `date` > curdate() - interval 5 day
+and sending_account.va <> 'H' and receiving_account.va <> 'H'
 group by date(`date`);";
 
         return (await sqlConnection.QueryAsync<TransactionCountByDay>(query)).ToList();
