@@ -9,7 +9,7 @@ on:
 env:
   AZURE_FUNCTIONAPP_NAME: valyria-api-exchange
   AZURE_FUNCTIONAPP_PACKAGE_PATH: './src/output'
-  DOTNET_VERSION: '6.0.201'
+  DOTNET_VERSION: '8.0.408'
 
 jobs:
   deploy-server:
